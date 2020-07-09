@@ -58,7 +58,7 @@ val permissions = SavedTypedMap(fileInHome("wob_bot_permissions"),
 val launch: Instant = Instant.now()
 
 fun main(args: Array<String>) {
-    LoggerUtil.getLogger("WoB").debug("Running version built at $version")
+    LoggerUtil.getLogger("WoW").debug("Running version built at $version")
 
     notifyOwners(launch)
 

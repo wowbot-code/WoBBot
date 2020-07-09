@@ -65,7 +65,7 @@ fun embedFromContent(titlePrefix: String, entry: Entry): EmbedBuilder {
     if (flags.isNotEmpty())
         embed.setDescription("**" + flags.joinToString().take(DESCRIPTION_LIMIT - 4) + "**")
 
-    val arcanumSuffix = "*… (Check Arcanum for more.)*"
+    val arcanumSuffix = "*… (Check the archive for more.)*"
 
     if (entry.note != null && entry.note.isNotBlank())
         embed.setFooter(("Footnote: " + entry.getFooterText())
@@ -165,10 +165,9 @@ fun about(message: Message) {
 
         setDescription("**Commands:** \n" +
                 (visibleCommands.filter { it.matches(message) }.joinToString("\n") { " * " + it.name }) + "\n" +
-                "Author: $wireStr$add\n" +
+                "Author of WoB: $wireStr$add\n" +
                 "[Invite Link]($invite) | " +
-                "[Github Source](https://github.com/Palanaeum/WoBBot) | " +
-                "[Arcanum]($urlTarget)")
+                "[WoB Github Source](https://github.com/Palanaeum/WoBBot)")
     })
 }
 
@@ -221,7 +220,7 @@ fun extractProgresses(): List<Progress> {
         progressCache.add(Progress(Entities.unescape(title).trim(), percentage.trim().substring(0, percentage.length-1), link))
     }
 
-    progressCacheTimeStamp = System.currentTimeMillis();
+    progressCacheTimeStamp = System.currentTimeMillis()
     return progressCache
 }
 
@@ -229,9 +228,9 @@ fun applyToOwners(toApply: User.() -> Unit) {
     val wireID = 77084495118868480L
     val wire = api.getUserById(wireID)
 
-    if (wobCommand == "wob")
+    if (wobCommand == "wow")
         runCatching { wire.get() }.onSuccess(toApply)
-    if (api.ownerId != wireID || wobCommand != "wob")
+    if (api.ownerId != wireID || wobCommand != "wow")
         runCatching { api.owner.get() }.onSuccess(toApply)
 }
 

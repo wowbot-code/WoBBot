@@ -23,13 +23,13 @@ private val gitProperties: Properties by lazy {
 
 val token: String? = System.getenv("DISCORD_TOKEN")
 val arcanumToken: String? = System.getenv("ARCANUM_TOKEN")
-val homepageTarget = System.getenv("BRANDONSANDERSON_URL") ?: ""
-val urlTarget = System.getenv("ARCANUM_URL") ?: "https://wob.coppermind.net"
-val wikiTarget = System.getenv("WIKI_URL") ?: "coppermind.net"
-val wikiCommand = System.getenv("WIKI_COMMAND") ?: "coppermind|cm"
-val wobCommand = System.getenv("WOB_COMMAND") ?: "wob"
-val iconUrl = System.getenv("ARCANUM_ICON") ?: "https://cdn.discordapp.com/emojis/373082865073913859.png?v=1"
-val wikiIconUrl = System.getenv("WIKI_ICON") ?: "https://cdn.discordapp.com/emojis/432391749550342145.png?v=1"
+val homepageTarget = System.getenv("BRANDONSANDERSON_URL") ?: "https://willwight.com"
+val urlTarget = System.getenv("ARCANUM_URL") ?: "https://abidanarchive.com"
+val wikiTarget = System.getenv("WIKI_URL") ?: "wiki.abidanarchive.com"
+val wikiCommand = System.getenv("WIKI_COMMAND") ?: "wiki"
+val wobCommand = System.getenv("WOB_COMMAND") ?: "wow"
+val iconUrl = System.getenv("ARCANUM_ICON") ?: "https://cdn.discordapp.com/attachments/406489339380498452/484436070428311553/31CsYz4VUNL.png"
+val wikiIconUrl = System.getenv("WIKI_ICON") ?: "https://cdn.discordapp.com/attachments/406489339380498452/484436070428311553/31CsYz4VUNL.png"
 val embedColor = Color((System.getenv("ARCANUM_COLOR") ?: "003A52").toInt(16))
 val wikiEmbedColor = Color((System.getenv("WIKI_COLOR") ?: "CB6D51").toInt(16))
 

@@ -132,7 +132,7 @@ fun Messageable.sendError(replyingTo: String, message: String, error: Throwable)
 
     val myId = (this as? User)?.id ?: (this as? PrivateChannel)?.recipient?.id
 
-    if ((myId == wireID && wobCommand == "wob") || myId == ownerID) {
+    if ((myId == wireID && wobCommand == "wow") || myId == ownerID) {
         sendTo(replyingTo, "message")
         sendTo(fullTrace, "error")
     } else {

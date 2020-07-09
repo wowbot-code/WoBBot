@@ -44,15 +44,23 @@ val wikiMarkup = Remark(Options.github().apply { inlineLinks = true; preserveRel
 fun Remark.convert(node: List<Node>, base: String): String = convertFragment(node.joinToString(""), base)
 fun Remark.convert(node: Node, base: String): String = convertFragment(node.toString(), base)
 
-class Coppermind : Wiki(wikiTarget) {
+class Coppermind : Wiki(wikiTarget, "") {
     private val cookies = mutableMapOf<String, String>()
 
     fun getSectionHTML(title: String): String {
-        return parse(getPageText(title.replace("+", "%20"))).replace("API", title.replace("[+_]".toRegex(), " "))
+        val pageText = getPageText(title.replace("+", "%20")).replace("API", title.replace("[+_]".toRegex(), " ") )
+
+        return parse(pageText.replace("{{Cradle NavBox}}", "")
+                .replace("{{EE Navbox}}", "")
+                .replace("{{TG Navbox}}", ""))
     }
 
     fun getDocument(title: String): Document {
         return Jsoup.parse(getSectionHTML(title), "https://$wikiTarget")
+    }
+
+    fun getNavBar(title: String): Document {
+        return Jsoup.parse(parseAndCleanup("{{$title}}"))
     }
 
     override fun getPageText(title: String?): String {
@@ -237,7 +245,7 @@ fun embedFromWiki(titlePrefix: String, name: String, entry: Pair<List<String>, S
     val embed = EmbedBuilder()
             .setColor(wikiEmbedColor)
             .setTitle(title)
-            .setUrl("https://$wikiTarget/wiki/" + name.replace("[+\\s]".toRegex(), "_"))
+            .setUrl("https://$wikiTarget/index.php/" + name.replace("[+\\s]".toRegex(), "_"))
             .setThumbnail(wikiIconUrl)
 
     val description = mutableListOf<String>()
@@ -260,7 +268,7 @@ fun embedFromWiki(titlePrefix: String, name: String, entry: Pair<List<String>, S
 
 fun backupEmbed(title: String, name: String): EmbedBuilder {
     return EmbedBuilder().setColor(wikiEmbedColor).setTitle(title + name.replace("+", " ").replace("#", ": "))
-            .setUrl("https://$wikiTarget/wiki/" + name.replace("[+\\s]".toRegex(), "_"))
+            .setUrl("https://$wikiTarget/" + name.replace("[+\\s]".toRegex(), "_"))
             .setThumbnail(wikiIconUrl).setDescription("An error occurred in loading the wiki preview.")
 }
 
@@ -345,10 +353,34 @@ fun searchCoppermind(message: Message, terms: List<String>) {
         } catch (e: FileNotFoundException) {
             message.channel.sendMessage("Couldn't find any articles for \"${terms.joinToString(" ")}\".")
         }
-        if (it.channel !is PrivateChannel)
+        if (it.channel !is PrivateChannel) {
             it.delete()
+        }
     }.catch {
         type.close()
         message.sendError("An error occurred trying to look up the article.", it)
     }
+}
+
+
+fun fetchNavBar(searchInfo: String): Pair<List<String>, String> {
+    val templateXml = wiki.getNavBar(searchInfo)
+    val templateLinks = templateXml.getElementsByClass("navbox-list")
+
+    val body = wikiMarkup.convert(templateLinks[0], "https://$wikiTarget")
+    return emptyList<String>() to body
+}
+
+fun getNavigationBar(message: Message, term: String, title: String) {
+    try {
+        val embed = embedFromWiki("Information requested: ", title, fetchNavBar(term))
+        embed.setTitle(embed.toJsonNode()["title"].asText().replace(".*\n".toRegex(), ""))
+        message.channel.sendMessage(embed).setupDeletable(message.author)
+    } catch (e: FileNotFoundException) {
+        message.sendError("An error occurred trying to look up the article.", e)
+    }
+}
+
+fun getRandomPage(message: Message) {
+    searchCoppermind(message, listOf(wiki.random()))
 }

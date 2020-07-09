@@ -6,6 +6,8 @@ import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.event.message.MessageCreateEvent
 import wiresegal.wob.arcanum.*
+import wiresegal.wob.coppermind.getNavigationBar
+import wiresegal.wob.coppermind.getRandomPage
 import wiresegal.wob.coppermind.retrieveCoppermindPages
 import wiresegal.wob.coppermind.searchCoppermind
 import wiresegal.wob.misc.emotions.EMOTIONS
@@ -123,7 +125,7 @@ fun registerBuiltinHandlers() {
             if (wikiCommands.any { trimmed == "!$it" })
                 message.channel.sendMessage("Use `$trimmed \"term\"` to search.")
             else {
-                val allPages = "coppermind\\.net/wiki/([A-Za-z0-9._/~%\\-+&#?!=()@]+)".toRegex(RegexOption.IGNORE_CASE).findAll(content)
+                val allPages = "wiki\\.abidanarchive\\.com/([A-Za-z0-9._/~%\\-+&#?!=()@]+)".toRegex(RegexOption.IGNORE_CASE).findAll(content)
 
                 if (allPages.any()) {
                     retrieveCoppermindPages(message, allPages.map { it.groupValues[1] }.toList())
@@ -137,6 +139,41 @@ fun registerBuiltinHandlers() {
 
                 if (terms.any()) async {
                     searchCoppermind(message, terms)
+                }
+            }
+        }
+        addCommand("wikirandom") { content, trimmed, _, message ->
+            getRandomPage(message)
+        }
+        addCommand("wikinav") { content, trimmed, _, message ->
+            if (trimmed == "!wikinav") {
+                message.channel.sendMessage("Use `$trimmed \"term\"` to search. Possible terms are Cradle, TG, or EE")
+            }
+            else {
+                val terms = "[\"“]([/\\w\\s,']+)[\"”]".toRegex().findAll(content).toList()
+                        .flatMap {
+                            it.groupValues[1].split("[\\s,]+".toRegex())
+                        }.filter { it.matches("[/\\w']+".toRegex()) }
+                        .map { it.toLowerCase().capitalize() }
+
+                if (terms.any()) async {
+                    when {
+                        terms.size > 1 -> {
+                            message.channel.sendMessage("Use `!wikinav \"term\"` to search. Possible terms are Cradle, TG, or EE")
+                        }
+                        terms.last().toLowerCase() == "cradle" -> {
+                            getNavigationBar(message, "Cradle NavBox", "Cradle")
+                        }
+                        terms.last().toLowerCase() == "tg" -> {
+                            getNavigationBar(message, "TG Navbox", "Traveler's Gate")
+                        }
+                        terms.last().toLowerCase() == "ee" -> {
+                            getNavigationBar(message, "EE Navbox", "Elder Empire")
+                        }
+                        else -> {
+                            message.channel.sendMessage("Use `!wikinav \"term\"` to search. Possible terms are Cradle, TG, or EE")
+                        }
+                    }
                 }
             }
         }
@@ -199,18 +236,20 @@ fun registerBuiltinHandlers() {
         }
     }
 
+    addCommand("invite") { _, _, _, message ->
+        message.channel.sendMessage("Discord invite link: https://discord.com/invite/6AyYFER")
+    }
+
+    addCommand("shorts") { _, _, _, message ->
+        message.channel.sendMessage("Short stories folder: https://drive.google.com/drive/folders/15aQxpOw8bKXz7DGG4Wwv9hCXQZjCUrfV?usp=sharing")
+    }
+
     addCommand("${wobCommand}help") { _, _, _, message ->
-        message.channel.sendMessage("Use `!$wobCommand \"term\"` to search, or put a WoB link in to get its text directly.")
+        message.channel.sendMessage("Use `!$wobCommand \"term\"` to search, or put a link in to get its text directly.")
     }
 
     addCommand("${wobCommand}about") { _, _, _, message ->
         about(message)
-    }
-
-    if(homepageTarget.isNotEmpty()) {
-        addCommand("${wobCommand}progress") { _, _, _, message ->
-            showProgressBar(message)
-        }
     }
 
     addCommand("${wobCommand}random") { _, _, _, message ->
@@ -228,18 +267,9 @@ fun registerBuiltinHandlers() {
         })
     }
 
-    if (wobCommand == "wob") {
-        addHiddenCalloutHandler("saythewords") { _, _, _, message ->
-            message.channel.sendMessage("**`Life before death.`**\n" +
-                    "**`Strength before weakness.`**\n" +
-                    "**`Journey before destination.`**")
-        }
+    if (wobCommand == "wow") {
 
-        addMultiCalloutHandler(listOf("lifebeforedeath", "strengthbeforeweakness", "journeybeforedestination")) { _, _, _, message ->
-            message.channel.sendMessage("**`These Words are Accepted.`**")
-        }
-
-        addExactCalloutHandler("express my opinion, wobbot") { content, _, _, message ->
+        addExactCalloutHandler("express my opinion, Presence") { content, _, _, message ->
             if (message.content.toLowerCase(Locale.ROOT).trim() == content && message.checkPermissions(BotRanks.MANAGE_MESSAGES)) {
                 if (message.channel !is PrivateChannel)
                     message.delete()
@@ -247,16 +277,16 @@ fun registerBuiltinHandlers() {
             }
         }
 
-        addExactCalloutHandler("thank you, wobbot") { _, _, _, message ->
+        addExactCalloutHandler("thank you, Presence") { _, _, _, message ->
             message.channel.sendEmotion("blush")
         }
 
-        addExactCalloutHandler("i love you, wobbot") { _, _, _, message ->
+        addExactCalloutHandler("i love you, Presence") { _, _, _, message ->
             message.channel.sendEmotion("love")
         }
 
         for (emotion in EMOTIONS)
-            addExactCalloutHandler("express $emotion, wobbot") { content, _, _, message ->
+            addExactCalloutHandler("express $emotion, Presence") { content, _, _, message ->
                 if (message.content.toLowerCase(Locale.ROOT).trim() == content && message.checkPermissions(BotRanks.MANAGE_MESSAGES)) {
                     if (message.channel !is PrivateChannel)
                         message.delete()
